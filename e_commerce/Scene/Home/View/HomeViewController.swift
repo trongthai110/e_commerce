@@ -16,8 +16,8 @@ class HomeViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     var viewModel: HomeViewModel
-    
     let screensize: CGRect = UIScreen.main.bounds
+    var headerView = HeaderView()
     
     init(viewModel: HomeViewModel) {
         self.viewModel = viewModel
@@ -60,18 +60,39 @@ class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func initializeUI() {
-        
-        
+        viewModel.title.bind(to: navigationItem.rx.title).disposed(by: disposeBag)
+
         tableView.backgroundColor = .white
+        view.addSubview(headerView)
         view.addSubview(tableView)
         
+        headerView.snp.makeConstraints { make in
+            make.top.equalTo(10)
+            make.left.equalToSuperview()
+            make.right.equalToSuperview()
+            make.bottom.equalTo(tableView.snp.top).offset(0)
+            make.height.equalTo(100)
+        }
+        
         tableView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.left.equalToSuperview()
+            make.right.equalToSuperview()
+            make.bottom.equalToSuperview()
         }
     }
     
     func initializeSubscribers() {
+        headerView.btnGoToCart.rx.tap.bind(onNext: { [weak self] in
+            self?.viewModel.cartTapped()
+        }).disposed(by: disposeBag)
         
+        
+        viewModel.productQuantity
+            .subscribe(onNext: { [weak self] data in
+                self?.headerView.lblCounting.text = String(data)
+            }).disposed(by: disposeBag)
+        
+        viewModel.getProductQuantity()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -87,11 +108,17 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         cell.lblCategories.text = apiResult[indexPath.row].category
         cell.imgProduct.downloaded(from: apiResult[indexPath.row].image, contentMode: .scaleAspectFit)
         
+        cell.buttonAction = { [weak self] in
+            self?.viewModel.addToCart(for: (self?.apiResult[indexPath.row])!)
+        }
+        
+        cell.lblTotal.isHidden = true
+        cell.btnPlus.isHidden = true
+        cell.btnMinus.isHidden = true
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.viewModel.onTapped(id: apiResult[indexPath.row].id)
-        print("selected:", apiResult[indexPath.row].id)
     }
 }

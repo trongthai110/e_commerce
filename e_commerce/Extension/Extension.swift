@@ -83,6 +83,21 @@ extension Double {
         let roundedNumber = (self * divisor).rounded() / divisor
         return String(format: "%.\(decimalPlaces)f", roundedNumber)
     }
+    
+    // MARK: - ================================= Dấu phân hàng nghìn =================================
+    func thousandsSeparator() -> String {
+        
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal          // Đặt mặc định cho trình định dạng phổ biến để hiển thị số thập phân
+        numberFormatter.usesGroupingSeparator = true    // Đã bật dấu tách
+        numberFormatter.groupingSeparator = ","         // Đặt dấu phân cách hàng nghìn
+        numberFormatter.decimalSeparator = "."          // Đặt dấu phân cách hàng thập phân
+        numberFormatter.groupingSize = 3                // Đặt các chữ số giữa mỗi dấu phân cách
+        
+        let myFormattedDouble = numberFormatter.string(for: self)
+        
+        return myFormattedDouble!
+    }
 }
 
 

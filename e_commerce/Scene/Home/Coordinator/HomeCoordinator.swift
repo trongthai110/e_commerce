@@ -16,8 +16,6 @@ class HomeCoordinator: BaseCoordinator<Void> {
         self.window = window
     }
     
-    var id: Int = 0
-    
     override func start() -> Observable<Void> {
         let viewModel = HomeViewModel()
         let viewController = HomeViewController(viewModel: viewModel)
@@ -26,7 +24,12 @@ class HomeCoordinator: BaseCoordinator<Void> {
         viewController.viewModel = viewModel
         
         viewModel.idProduct.subscribe(onNext: { [weak self] data in
-            self?.showCalendar(id: data, in: navigationController)
+            self?.showDetail(id: data, in: navigationController)
+            
+        })
+        .disposed(by: disposeBag)
+        
+        viewModel.navigateToCart.subscribe(onNext: { [weak self] in self?.showCart(in: navigationController)
             
         })
         .disposed(by: disposeBag)
@@ -37,9 +40,17 @@ class HomeCoordinator: BaseCoordinator<Void> {
         return Observable.never()
     }
     
-    private func showCalendar(id: Int, in navigationController: UINavigationController) {
-        let viewModel = DetailViewModel(id: id)
-        let detailViewController = DetailViewController(viewModel: viewModel, id: id)
-        navigationController.pushViewController(detailViewController, animated: true)
+    private func showDetail(id: Int, in navigationController: UINavigationController) {
+        let detailCoordinator = DetailCoordinator(navigationController: navigationController, id: id)
+        coordinate(to: detailCoordinator)
+            .subscribe()
+            .disposed(by: disposeBag)
+    }
+    
+    private func showCart(in navigationController: UINavigationController) {
+        let cartCoordinator = CartCoordinator(navigationController: navigationController)
+        coordinate(to: cartCoordinator)
+            .subscribe()
+            .disposed(by: disposeBag)
     }
 }

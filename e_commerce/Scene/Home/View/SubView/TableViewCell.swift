@@ -17,10 +17,18 @@ class TableViewCell: UITableViewCell {
     @IBOutlet weak var lblRate: UILabel!
     @IBOutlet weak var lblCount: UILabel!
     @IBOutlet weak var btnAddToCart: UIButton!
+    @IBOutlet weak var btnPlus: UIButton!
+    @IBOutlet weak var btnMinus: UIButton!
+    @IBOutlet weak var lblTotal: UILabel!
+    
+    var buttonAction: (() -> Void)?
+    var plusAction: (() -> Void)?
+    var minusAction: (() -> Void)?
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        lblTitle.numberOfLines = 0
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -30,6 +38,12 @@ class TableViewCell: UITableViewCell {
     }
     
     @IBAction func btnAddToCart(_ sender: Any) {
-        print("Add to cart")
+        buttonAction?()
+    }
+    @IBAction func btnPlus(_ sender: Any) {
+        plusAction?()
+    }
+    @IBAction func btnMinus(_ sender: Any) {
+        minusAction?()
     }
 }

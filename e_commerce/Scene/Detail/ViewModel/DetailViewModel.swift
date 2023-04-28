@@ -14,7 +14,7 @@ import Moya
 class DetailViewModel {
     
     private let disposeBag = DisposeBag()
-    
+    let title = BehaviorSubject<String>(value: "Detail")
     let id: Int
     
     init(id: Int) {
