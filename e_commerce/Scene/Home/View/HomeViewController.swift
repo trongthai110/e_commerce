@@ -17,7 +17,8 @@ class HomeViewController: UIViewController {
     
     var viewModel: HomeViewModel
     let screensize: CGRect = UIScreen.main.bounds
-    var headerView = HeaderView()
+    let btnGotoCart = UIBarButtonItem(image: UIImage(systemName: "cart.fill"), style: .done, target: nil, action: nil)
+    let btnGotoHistory = UIBarButtonItem(image: UIImage(systemName: "clock.arrow.circlepath"), style: .plain, target: nil, action: nil)
     
     init(viewModel: HomeViewModel) {
         self.viewModel = viewModel
@@ -34,9 +35,13 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 40))
+        label.text = "0"
+        label.textColor = .red
+        let lblCounting = UIBarButtonItem(customView: label)
+        
         initializeUI()
         initializeSubscribers()
-        
         
         //register cell
         tableView.register(UINib(nibName: "TableViewCell", bundle: nil), forCellReuseIdentifier: "cell")
@@ -44,6 +49,11 @@ class HomeViewController: UIViewController {
         //delegate & datasouce
         tableView.delegate = self
         tableView.dataSource = self
+        
+        btnGotoCart.tintColor = .orange
+        btnGotoHistory.tintColor = .orange
+        self.navigationItem.rightBarButtonItems = [btnGotoCart, btnGotoHistory, lblCounting]
+        self.navigationController?.navigationBar.tintColor = .orange
         
         networkManager.getAllProduct { product, error in
             
@@ -55,44 +65,38 @@ class HomeViewController: UIViewController {
             self.tableView.reloadData()
         }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        viewModel.productQuantity
+            .subscribe(onNext: { [weak self] data in
+                //self?.headerView.lblCounting.text = String(data)
+            }).disposed(by: disposeBag)
+        
+        viewModel.getProductQuantity()
+    }
 }
 
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func initializeUI() {
         viewModel.title.bind(to: navigationItem.rx.title).disposed(by: disposeBag)
-
+        
         tableView.backgroundColor = .white
-        view.addSubview(headerView)
         view.addSubview(tableView)
         
-        headerView.snp.makeConstraints { make in
-            make.top.equalTo(10)
-            make.left.equalToSuperview()
-            make.right.equalToSuperview()
-            make.bottom.equalTo(tableView.snp.top).offset(0)
-            make.height.equalTo(100)
-        }
-        
         tableView.snp.makeConstraints { make in
-            make.left.equalToSuperview()
-            make.right.equalToSuperview()
-            make.bottom.equalToSuperview()
+            make.edges.equalToSuperview()
         }
     }
     
     func initializeSubscribers() {
-        headerView.btnGoToCart.rx.tap.bind(onNext: { [weak self] in
-            self?.viewModel.cartTapped()
+        btnGotoCart.rx.tap.subscribe(onNext: {
+            self.viewModel.cartTapped()
         }).disposed(by: disposeBag)
         
-        
-        viewModel.productQuantity
-            .subscribe(onNext: { [weak self] data in
-                self?.headerView.lblCounting.text = String(data)
-            }).disposed(by: disposeBag)
-        
-        viewModel.getProductQuantity()
+        btnGotoHistory.rx.tap.subscribe(onNext: {
+            self.viewModel.historyTapped()
+        }).disposed(by: disposeBag)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

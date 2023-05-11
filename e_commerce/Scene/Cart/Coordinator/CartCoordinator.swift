@@ -22,7 +22,7 @@ class CartCoordinator: BaseCoordinator<Void> {
         
         viewController.viewModel = viewModel
         
-        viewModel.navigateToCheckout.subscribe(onNext: { [weak self] in
+        viewModel.navigateToOrder.subscribe(onNext: { [weak self] in
             self?.showOrder(in: self!.navigationController)
 
         }).disposed(by: disposeBag)

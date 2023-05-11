@@ -14,24 +14,26 @@ import RealmSwift
 
 class CartViewModel {
     let title = BehaviorSubject<String>(value: "Cart")
-    let productOffline = PublishSubject<ProductOffline>()
-    let navigateToCheckout = PublishRelay<Void>()
+    let navigateToOrder = PublishRelay<Void>()
     let productTotal = PublishSubject<Array<IndexPath>>()
     let totalPrice = BehaviorRelay<Double>(value: 0)
+    var productResult: [ProductOffline] = []
     let realm = try! Realm()
     
     func checkoutTapped() {
-        navigateToCheckout.accept(())
-        print("Go to checkout")
+        navigateToOrder.accept(())
+        print("Go to Order")
     }
     
     func getProductOffline() {
+        productResult = []
         let list = realm.objects(ProductOffline.self).toArray(ofType: ProductOffline.self)
         
-        list.forEach { productOffline.onNext($0) }
+        list.forEach { productResult.append($0) }
         
-        let total = list.reduce(0, { $0 + $1.price })
+        let total = list.reduce(0, { $0 + $1.price * Double($1.quantity) })
         totalPrice.accept(total)
+        print(total)
     }
     
     func handleProductOffline(for data: ProductOffline, for isPlus: Bool, for index: Array<IndexPath>) {
@@ -45,10 +47,13 @@ class CartViewModel {
             if let productObject = realm.objects(ProductOffline.self).filter("id == \(data.id)").first {
                 try! realm.write {
                     productObject.quantity -= 1
+                    if productObject.quantity <= 0 {
+                        realm.delete(productObject)
+                    }
                 }
             }
         }
-        print("index", index)
+        getProductOffline()
         productTotal.onNext(index)
     }
 }

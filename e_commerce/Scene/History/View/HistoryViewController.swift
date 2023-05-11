@@ -1,8 +1,8 @@
 //
-//  OrderViewController.swift
+//  HistoryViewController.swift
 //  e_commerce
 //
-//  Created by Nguyen Dang Trong Thai on 4/28/23.
+//  Created by Nguyen Dang Trong Thai on 5/4/23.
 //
 
 import UIKit
@@ -10,16 +10,15 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class OrderViewController: UIViewController {
+class HistoryViewController: UIViewController {
     
     var tableView = UITableView(frame: UIScreen.main.bounds)
     private let disposeBag = DisposeBag()
     
-    var viewModel: OrderViewModel
-    var footerView = FooterView()
+    var viewModel: HistoryViewModel
     let screensize: CGRect = UIScreen.main.bounds
     
-    init(viewModel: OrderViewModel) {
+    init(viewModel: HistoryViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -44,43 +43,22 @@ class OrderViewController: UIViewController {
     }
 }
 
-extension OrderViewController: UITableViewDelegate, UITableViewDataSource {
+extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
     
     func initializeUI() {
         viewModel.title.bind(to: navigationItem.rx.title).disposed(by: disposeBag)
         
-        footerView.lblPrivacy.text = "By pressing confirm order, you agree to our Terms and Privacy"
-        footerView.lblPrivacy.numberOfLines = 0
-        footerView.lblPrivacy.lineBreakMode = .byWordWrapping
-        footerView.btnGoToCheckOut.setTitle("Confirm Order", for: .normal)
-        
         tableView.backgroundColor = .white
         view.addSubview(tableView)
-        view.addSubview(footerView)
         
         tableView.snp.makeConstraints { make in
-            make.left.equalToSuperview()
-            make.right.equalToSuperview()
-            make.top.equalTo(0)
-        }
-        
-        footerView.snp.makeConstraints { make in
-            make.top.equalTo(tableView.snp.bottom).offset(0)
-            make.right.equalToSuperview()
-            make.left.equalToSuperview()
-            make.bottom.equalToSuperview()
-            make.height.equalTo(150)
+            make.edges.equalToSuperview()
         }
     }
     
     func initializeSubscribers() {
         viewModel.totalPrice.subscribe(onNext: { [weak self] data in
-            self?.footerView.lblPrice.text = String(data)
             self?.tableView.reloadData()
-        }).disposed(by: disposeBag)
-        
-        footerView.btnGoToCheckOut.rx.tap.bind(onNext: { [weak self] in
-            self?.viewModel.submitTapped()
         }).disposed(by: disposeBag)
         
         viewModel.getProductOffline()
@@ -108,3 +86,4 @@ extension OrderViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 }
+

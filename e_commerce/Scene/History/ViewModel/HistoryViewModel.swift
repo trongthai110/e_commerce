@@ -1,8 +1,8 @@
 //
-//  OrderViewModel.swift
+//  HistoryViewModel.swift
 //  e_commerce
 //
-//  Created by Nguyen Dang Trong Thai on 4/28/23.
+//  Created by Nguyen Dang Trong Thai on 5/4/23.
 //
 
 import Foundation
@@ -12,16 +12,16 @@ import Moya
 import RealmSwift
 
 
-class OrderViewModel {
-    let title = BehaviorSubject<String>(value: "Order")
-    let navigateToSubmit = PublishRelay<Void>()
+class HistoryViewModel {
+    let title = BehaviorSubject<String>(value: "History")
+    let navigateToHistoryDetail = PublishRelay<Void>()
     var productResult: [ProductOffline] = []
     let totalPrice = BehaviorRelay<Double>(value: 0)
     let realm = try! Realm()
     
     func submitTapped() {
-        navigateToSubmit.accept(())
-        print("Go to Submit")
+        navigateToHistoryDetail.accept(())
+        print("Go to History Detail")
     }
     
     func getProductOffline() {

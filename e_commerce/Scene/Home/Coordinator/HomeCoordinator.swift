@@ -26,13 +26,15 @@ class HomeCoordinator: BaseCoordinator<Void> {
         viewModel.idProduct.subscribe(onNext: { [weak self] data in
             self?.showDetail(id: data, in: navigationController)
             
-        })
-        .disposed(by: disposeBag)
+        }).disposed(by: disposeBag)
         
-        viewModel.navigateToCart.subscribe(onNext: { [weak self] in self?.showCart(in: navigationController)
-            
-        })
-        .disposed(by: disposeBag)
+        viewModel.navigateToCart.subscribe(onNext: { [weak self] in
+            self?.showCart(in: navigationController)
+        }).disposed(by: disposeBag)
+        
+        viewModel.navigateToHistory.subscribe(onNext: { [weak self] in
+            self?.showHistory(in: navigationController)
+        }).disposed(by: disposeBag)
         
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
@@ -50,6 +52,13 @@ class HomeCoordinator: BaseCoordinator<Void> {
     private func showCart(in navigationController: UINavigationController) {
         let cartCoordinator = CartCoordinator(navigationController: navigationController)
         coordinate(to: cartCoordinator)
+            .subscribe()
+            .disposed(by: disposeBag)
+    }
+    
+    private func showHistory(in navigationController: UINavigationController) {
+        let historyCoordinator = HistoryCoordinator(navigationController: navigationController)
+        coordinate(to: historyCoordinator)
             .subscribe()
             .disposed(by: disposeBag)
     }

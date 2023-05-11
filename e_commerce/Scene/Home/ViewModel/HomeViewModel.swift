@@ -16,6 +16,7 @@ class HomeViewModel {
     
     let idProduct = PublishSubject<Int>()
     let navigateToCart = PublishRelay<Void>()
+    let navigateToHistory = PublishRelay<Void>()
     let productQuantity = PublishSubject<Int>()
     let title = BehaviorSubject<String>(value: "Shop")
     let realm = try! Realm()
@@ -28,6 +29,11 @@ class HomeViewModel {
     func cartTapped() {
         navigateToCart.accept(())
         print("Go to cart")
+    }
+    
+    func historyTapped() {
+        navigateToHistory.accept(())
+        print("Go to History")
     }
     
     func addToCart(for data: ProductModel) {

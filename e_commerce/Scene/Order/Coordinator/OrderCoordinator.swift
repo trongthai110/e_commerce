@@ -22,6 +22,24 @@ class OrderCoordinator: BaseCoordinator<Void> {
         
         viewController.viewModel = viewModel
         
+        viewModel.navigateToSubmit.subscribe(onNext: { [weak self] in
+            self?.showResult(in: self!.navigationController, viewModel: viewModel)
+            
+        }).disposed(by: disposeBag)
+        
         return Observable.never()
     }
+    
+    private func showResult(in navigationController: UINavigationController, viewModel: OrderViewModel) {
+        let viewController = ResultViewController(viewModel: viewModel)
+        navigationController.pushViewController(viewController, animated: true)
+    }
+
+    
+//    private func showResult(in navigationController: UINavigationController) {
+//        navigationController.popToRootViewController(animated: true)
+//        let newViewController = NewViewController()
+//        navigationController.pushViewController(newViewController, animated: true)
+//    }
+
 }

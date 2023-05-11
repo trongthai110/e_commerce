@@ -28,8 +28,6 @@ class CartViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    var productResult = [ProductOffline]()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -74,12 +72,10 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func initializeSubscribers() {
-        viewModel.productOffline.subscribe(onNext: { [weak self] data in
-            self?.productResult.append(data)
-        }).disposed(by: disposeBag)
         
         viewModel.totalPrice.subscribe(onNext: { [weak self] data in
             self?.footerView.lblPrice.text = String(data)
+            self?.tableView.reloadData()
         }).disposed(by: disposeBag)
         
         viewModel.productTotal.subscribe(onNext: { [weak self] data in
@@ -87,32 +83,38 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
         }).disposed(by: disposeBag)
         
         footerView.btnGoToCheckOut.rx.tap.bind(onNext: { [weak self] in
-            self?.viewModel.checkoutTapped()
+            if self?.viewModel.productResult == [] {
+                print("Ko có sản phẩm nào")
+            } else {
+                self?.viewModel.checkoutTapped()
+            }
         }).disposed(by: disposeBag)
         
         viewModel.getProductOffline()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return productResult.count
+        return viewModel.productResult.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! TableViewCell
         
-        cell.lblTitle.text = productResult[indexPath.row].title
-        cell.lblPrice.text = productResult[indexPath.row].price.roundedString(decimalPlaces: 1)
-        cell.lblRate.text = productResult[indexPath.row].rate.toStarString()
-        cell.lblTotal.text = productResult[indexPath.row].quantity.thousandsSeparator()
-        cell.lblCategories.text = productResult[indexPath.row].category
-        cell.imgProduct.downloaded(from: productResult[indexPath.row].image, contentMode: .scaleAspectFit)
+        let data = viewModel.productResult[indexPath.row]
+        
+        cell.lblTitle.text = data.title
+        cell.lblPrice.text = data.price.roundedString(decimalPlaces: 1)
+        cell.lblRate.text = data.rate.toStarString()
+        cell.lblTotal.text = data.quantity.thousandsSeparator()
+        cell.lblCategories.text = data.category
+        cell.imgProduct.downloaded(from: data.image, contentMode: .scaleAspectFit)
         
         cell.plusAction = { [weak self] in
-            self?.viewModel.handleProductOffline(for: (self?.productResult[indexPath.row])!, for: true, for: [indexPath])
+            self?.viewModel.handleProductOffline(for: data, for: true, for: [indexPath])
         }
         
         cell.minusAction = { [weak self] in
-            self?.viewModel.handleProductOffline(for: (self?.productResult[indexPath.row])!, for: false, for: [indexPath])
+            self?.viewModel.handleProductOffline(for: data, for: false, for: [indexPath])
         }
         
         cell.btnAddToCart.isHidden = true
